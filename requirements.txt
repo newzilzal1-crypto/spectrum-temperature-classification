@@ -1,0 +1,18 @@
+# Tested with Python 3.12 on Windows 11
+streamlit==1.56.0
+pandas==2.2.3
+numpy==2.4.3
+scipy==1.17.1
+scikit-learn==1.8.0
+xgboost==3.2.0
+tensorflow==2.21.0
+keras==3.14.0
+plotly==6.6.0
+openpyxl==3.1.5
+joblib==1.5.3
+
+# Only needed for the original research scripts (Classfaction *.py)
+matplotlib==3.10.8
+seaborn==0.13.2
+pycm==4.6
+tqdm==4.67.3

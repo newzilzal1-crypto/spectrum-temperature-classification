@@ -1,0 +1,102 @@
+{
+  "models": {
+    "XGBoost": {
+      "type": "ml",
+      "file": "xgboost.joblib",
+      "fit_seconds": 15.99,
+      "n_params": null
+    },
+    "Random Forest": {
+      "type": "ml",
+      "file": "random_forest.joblib",
+      "fit_seconds": 0.15,
+      "n_params": null
+    },
+    "Gaussian Naive Bayes": {
+      "type": "ml",
+      "file": "gaussian_naive_bayes.joblib",
+      "fit_seconds": 0.0,
+      "n_params": null
+    },
+    "Decision Tree": {
+      "type": "ml",
+      "file": "decision_tree.joblib",
+      "fit_seconds": 0.0,
+      "n_params": null
+    },
+    "SVM": {
+      "type": "ml",
+      "file": "svm.joblib",
+      "fit_seconds": 0.04,
+      "n_params": null
+    },
+    "MLP": {
+      "type": "ml",
+      "file": "mlp.joblib",
+      "fit_seconds": 1.13,
+      "n_params": null
+    },
+    "CNN": {
+      "type": "dl",
+      "file": "cnn.keras",
+      "fit_seconds": 15.48,
+      "n_params": 924932
+    },
+    "CNN-LSTM": {
+      "type": "dl",
+      "file": "cnn_lstm.keras",
+      "fit_seconds": 13.85,
+      "n_params": 466180
+    }
+  },
+  "n_rows": 801,
+  "n_train": 560,
+  "n_test": 241,
+  "features": [
+    "Centroid Wavelength [nm (air)]",
+    "Peak Wavelength [nm (air)]",
+    "Peak Level [nW]",
+    "FWHM [pm (air)]",
+    "Peak Position [nm (air)]",
+    "Offset Peak Position [nm (air)]",
+    "Wavelength [nm (air)]",
+    "Offset Wavelength [nm (air)]",
+    "Level [dBm]",
+    "Offset Level [dB]",
+    "Noise [dBm]",
+    "OSNR [dB]"
+  ],
+  "dropped_features": [
+    "temperature"
+  ],
+  "labels": [
+    "Class1",
+    "Class2",
+    "Class3",
+    "Class4"
+  ],
+  "test_size": 0.3,
+  "seed": 42,
+  "cv_folds": 5,
+  "epochs": 100,
+  "batch_size": 64,
+  "trained_at": "2026-11-18 16:10",
+  "class_temperature": {
+    "Class1": [
+      0,
+      20
+    ],
+    "Class2": [
+      40,
+      40
+    ],
+    "Class3": [
+      60,
+      60
+    ],
+    "Class4": [
+      80,
+      100
+    ]
+  }
+}
