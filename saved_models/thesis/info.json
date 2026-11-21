@@ -1,0 +1,108 @@
+{
+  "models": {
+    "XGBoost": {
+      "type": "ml",
+      "file": "xgboost.joblib",
+      "fit_seconds": 0.03,
+      "n_params": null
+    },
+    "Random Forest": {
+      "type": "ml",
+      "file": "random_forest.joblib",
+      "fit_seconds": 0.14,
+      "n_params": null
+    },
+    "Gaussian Naive Bayes": {
+      "type": "ml",
+      "file": "gaussian_naive_bayes.joblib",
+      "fit_seconds": 0.0,
+      "n_params": null
+    },
+    "Decision Tree": {
+      "type": "ml",
+      "file": "decision_tree.joblib",
+      "fit_seconds": 0.0,
+      "n_params": null
+    },
+    "SVM": {
+      "type": "ml",
+      "file": "svm.joblib",
+      "fit_seconds": 0.03,
+      "n_params": null
+    },
+    "MLP": {
+      "type": "ml",
+      "file": "mlp.joblib",
+      "fit_seconds": 0.33,
+      "n_params": null
+    },
+    "CNN": {
+      "type": "dl",
+      "file": "cnn.keras",
+      "fit_seconds": 14.64,
+      "n_params": 924932
+    },
+    "CNN-LSTM": {
+      "type": "dl",
+      "file": "cnn_lstm.keras",
+      "fit_seconds": 18.08,
+      "n_params": 466180
+    }
+  },
+  "n_rows": 801,
+  "n_train": 560,
+  "n_test": 241,
+  "protocol": "thesis",
+  "features": [
+    "temperature",
+    "Centroid Wavelength [nm (air)]",
+    "Peak Wavelength [nm (air)]",
+    "Peak Level [nW]",
+    "FWHM [pm (air)]",
+    "Peak Position [nm (air)]",
+    "Offset Peak Position [nm (air)]",
+    "Wavelength [nm (air)]",
+    "Offset Wavelength [nm (air)]",
+    "Level [dBm]",
+    "Offset Level [dB]",
+    "Noise [dBm]",
+    "OSNR [dB]"
+  ],
+  "dropped_features": [],
+  "labels": [
+    "Good",
+    "Not Bad",
+    "Poor",
+    "Very Poor"
+  ],
+  "class_rule": {
+    "Good": "0 < T ≤ 25 °C",
+    "Not Bad": "25 < T ≤ 50 °C",
+    "Poor": "50 < T ≤ 75 °C",
+    "Very Poor": "75 < T ≤ 100 °C"
+  },
+  "test_size": 0.3,
+  "seed": 42,
+  "cv_folds": 5,
+  "epochs": 100,
+  "batch_size": 64,
+  "trained_at": "2026-11-21 23:57",
+  "class_temperature": {
+    "Good": [
+      0,
+      20
+    ],
+    "Not Bad": [
+      40,
+      40
+    ],
+    "Poor": [
+      60,
+      60
+    ],
+    "Very Poor": [
+      80,
+      100
+    ]
+  }
+}

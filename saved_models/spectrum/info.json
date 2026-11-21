@@ -3,13 +3,13 @@
     "XGBoost": {
       "type": "ml",
       "file": "xgboost.joblib",
-      "fit_seconds": 15.99,
+      "fit_seconds": 0.16,
       "n_params": null
     },
     "Random Forest": {
       "type": "ml",
       "file": "random_forest.joblib",
-      "fit_seconds": 0.15,
+      "fit_seconds": 0.24,
       "n_params": null
     },
     "Gaussian Naive Bayes": {
@@ -21,37 +21,38 @@
     "Decision Tree": {
       "type": "ml",
       "file": "decision_tree.joblib",
-      "fit_seconds": 0.0,
+      "fit_seconds": 0.01,
       "n_params": null
     },
     "SVM": {
       "type": "ml",
       "file": "svm.joblib",
-      "fit_seconds": 0.04,
+      "fit_seconds": 0.06,
       "n_params": null
     },
     "MLP": {
       "type": "ml",
       "file": "mlp.joblib",
-      "fit_seconds": 1.13,
+      "fit_seconds": 1.71,
       "n_params": null
     },
     "CNN": {
       "type": "dl",
       "file": "cnn.keras",
-      "fit_seconds": 15.48,
+      "fit_seconds": 20.32,
       "n_params": 924932
     },
     "CNN-LSTM": {
       "type": "dl",
       "file": "cnn_lstm.keras",
-      "fit_seconds": 13.85,
+      "fit_seconds": 21.5,
       "n_params": 466180
     }
   },
   "n_rows": 801,
   "n_train": 560,
   "n_test": 241,
+  "protocol": "spectrum",
   "features": [
     "Centroid Wavelength [nm (air)]",
     "Peak Wavelength [nm (air)]",
@@ -70,31 +71,37 @@
     "temperature"
   ],
   "labels": [
-    "Class1",
-    "Class2",
-    "Class3",
-    "Class4"
+    "Good",
+    "Not Bad",
+    "Poor",
+    "Very Poor"
   ],
+  "class_rule": {
+    "Good": "0 < T ≤ 25 °C",
+    "Not Bad": "25 < T ≤ 50 °C",
+    "Poor": "50 < T ≤ 75 °C",
+    "Very Poor": "75 < T ≤ 100 °C"
+  },
   "test_size": 0.3,
   "seed": 42,
   "cv_folds": 5,
   "epochs": 100,
   "batch_size": 64,
-  "trained_at": "2026-11-18 16:10",
+  "trained_at": "2026-11-22 00:01",
   "class_temperature": {
-    "Class1": [
+    "Good": [
       0,
       20
     ],
-    "Class2": [
+    "Not Bad": [
       40,
       40
     ],
-    "Class3": [
+    "Poor": [
       60,
       60
     ],
-    "Class4": [
+    "Very Poor": [
       80,
       100
     ]

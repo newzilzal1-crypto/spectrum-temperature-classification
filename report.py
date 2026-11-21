@@ -33,6 +33,7 @@ body{font-family:Georgia,'Times New Roman',serif;color:#1c2430;max-width:960px;m
 .title{text-align:center;border-top:4px solid #1F3A5F;border-bottom:1px solid #ccd;padding:26px 0 18px;margin-bottom:22px}
 .title .inst{font-variant:small-caps;letter-spacing:.06em;color:#556}
 .title h1{font-size:24px;color:#1F3A5F;margin:12px 40px}
+.title .sub{font-style:italic;color:#334;margin:-4px 0 10px}
 .title .meta{color:#334}
 h2{color:#1F3A5F;border-bottom:1px solid #dde;padding-bottom:4px;margin-top:30px;font-size:20px}
 h3{color:#1F3A5F;font-size:16px;margin-bottom:4px}
@@ -56,15 +57,16 @@ code{font-size:12px;background:#f1f3f6;padding:1px 4px;border-radius:3px}
 """
 
 
-def build_report(project, info, features, labels, best, abstract, class_def, desc, models, test_tbl, cv_tbl,
-                 sig, discussion, limitations, conclusion, future, figs) -> str:
+def build_report(project, info, features, labels, best, abstract, data_text, class_def, desc, models, test_tbl,
+                 cv_tbl, sig, robust, discussion, limitations, conclusion, future, figs) -> str:
+    """robust = {"text": str, "table": DataFrame, "fig": Figure} for the spectrum-only analysis."""
     from plotly.offline import get_plotlyjs
     e = html.escape
     b = test_tbl.loc[best]
     flow = " <i>→</i> ".join(f"<span>{s}</span>" for s in [
-        f"Raw data<br>{info['n_rows']} samples", "Remove leaking<br>feature", f"Stratified split<br>"
-        f"{info['n_train']} / {info['n_test']}", "IQR clipping +<br>standardisation", f"{info['cv_folds']}-fold<br>CV",
-        "Train 8<br>models", "Hold-out<br>evaluation", "McNemar tests &<br>error analysis"])
+        f"Sensor data<br>{info['n_rows']} records", "Sieve labelling<br>(oil temperature)", f"Stratified split<br>"
+        f"{info['n_train']} / {info['n_test']}", "IQR clipping +<br>z-score", f"{info['cv_folds']}-fold<br>CV",
+        "Train 8<br>models", "Hold-out<br>evaluation", "Repeat without<br>temperature"])
     cms = "".join(f"<div>{_div(f)}</div>" for f in figs["cms"])
 
     return f"""<!doctype html><html lang="en"><head><meta charset="utf-8">
@@ -73,38 +75,38 @@ def build_report(project, info, features, labels, best, abstract, class_def, des
 
 <div class="title"><div class="inst">{e(project.get('institution', ''))}</div>
 <h1>{e(project.get('title', ''))}</h1>
+<div class="sub">{e(project.get('subtitle', ''))}</div>
 <div class="meta">{e(project.get('degree', ''))} · {e(project.get('year', ''))}<br>
-<b>Candidate:</b> {e(project.get('author', ''))} &nbsp;|&nbsp; <b>Supervisor:</b> {e(project.get('supervisor', ''))}</div></div>
+<b>Candidate:</b> {e(project.get('author', ''))} &nbsp;|&nbsp; <b>Supervisors:</b> {e(project.get('supervisor', ''))}</div></div>
 
 <h2>Abstract</h2><div class="abstract">{_md(abstract)}</div>
 
 <h2>1. Problem definition and data</h2>
-<p>The task is to assign each optical spectrum measurement to one of {len(labels)} temperature classes using
-{len(features)} spectral features. The dataset contains {info['n_rows']} measurements without missing values.
-The temperature variable was excluded from the inputs because it determines the class exactly (Table 1).</p>
-<div class="grid">{_table(class_def, "Class definitions and sample distribution.", 1, "{}")}
+<p>{_md(data_text)}</p>
+<div class="grid">{_table(class_def, "Oil-condition classes, labelling rule and sample distribution.", 1, "{}")}
 {F(figs['classes'], f"Samples per class (N = {info['n_rows']}).", 1)}</div>
-{_table(desc, "Descriptive statistics of the input features.", 2, "{:.3f}")}
+{_table(desc, "Descriptive statistics of the input attributes.", 2, "{:.3f}")}
 
 <h2 class="pb">2. Methodology</h2>
 <figure><div class="flow">{flow}</div><figcaption><b>Figure 2.</b> Experimental pipeline. All fitted
 transformations are learned from training data only.</figcaption></figure>
 <h3>2.1 Pre-processing</h3>
-<p>Each feature is clipped to [Q1 − 1.5·IQR, Q3 + 1.5·IQR] and standardised to zero mean and unit variance. Quartiles,
-means and standard deviations are estimated on the training set; within cross-validation they are re-estimated on
-every training fold to avoid information leakage.</p>
+<p>Records with missing values are removed. Each attribute is clipped to [Q1 − 1.5·IQR, Q3 + 1.5·IQR] (EDA outlier
+treatment) and standardised with the z-score. Quartiles, means and standard deviations are estimated on the training
+set; within cross-validation they are re-estimated on every training fold to avoid information leakage.</p>
 <h3>2.2 Models</h3>
 {_table(models, "Classifiers evaluated and their configuration.", 3, "{}")}
 <p class="note">Neural networks: Adam (learning rate 10<sup>−3</sup>), {info['epochs']} epochs, batch size
-{info['batch_size']}, sparse categorical cross-entropy, 20% of the training data held out for validation.</p>
+{info['batch_size']}, categorical cross-entropy, 20% of the training data held out for validation.</p>
 <h3>2.3 Evaluation protocol</h3>
 <p>Models are compared by {info['cv_folds']}-fold stratified cross-validation on the training set and on a stratified
 held-out test set ({info['test_size']:.0%}, n = {info['n_test']}, seed {info['seed']}) used only for the final
 evaluation. Reported metrics are accuracy, macro-averaged precision, recall and F1-score, Cohen's κ, the multi-class
 Matthews correlation coefficient (MCC) and the one-vs-rest macro ROC-AUC. Pairwise differences are tested with
-McNemar's exact test (α = 0.05).</p>
+McNemar's exact test (α = 0.05). The whole procedure is run twice: with all 13 attributes (thesis protocol) and
+without the temperature attribute (spectrum-only protocol).</p>
 
-<h2 class="pb">3. Results</h2>
+<h2 class="pb">3. Results — thesis protocol</h2>
 <p>{e(best)} obtained the best test-set performance: accuracy {b['Accuracy']:.2%}, macro F1-score
 {b['F1-score']:.2%} and ROC-AUC {b['ROC-AUC']:.3f} (Table 4).</p>
 {_table(test_tbl, f"Performance on the held-out test set (n = {info['n_test']}), sorted by macro F1-score.", 4)}
@@ -118,11 +120,16 @@ columns: predicted class; counts and row percentages).</figcaption></figure>
 {_table(sig, f"McNemar's exact test: {best} compared with every other model on the test set.", 6)}
 {F(figs['gap'], "Training vs test accuracy; a large gap indicates over-fitting.", 7)}
 
-<h2 class="pb">4. Discussion</h2>
+<h2 class="pb">4. Robustness analysis — spectrum only</h2>
+<p>{_md(robust['text'])}</p>
+{_table(robust['table'], "Test-set accuracy and macro F1-score with and without the temperature attribute.", 7)}
+{F(robust['fig'], "Test-set macro F1-score of every model under both protocols.", 8)}
+
+<h2 class="pb">5. Discussion</h2>
 {''.join(f"<p><b>{e(h)}.</b> {_md(t)}</p>" for h, t in discussion)}
 <h3>Limitations</h3><ul>{''.join(f"<li>{_md(x)}</li>" for x in limitations)}</ul>
 
-<h2>5. Conclusion</h2><div class="abstract">{_md(conclusion)}</div>
+<h2>6. Conclusion</h2><div class="abstract">{_md(conclusion)}</div>
 <h3>Future work</h3><ul>{''.join(f"<li>{_md(x)}</li>" for x in future)}</ul>
 <p class="note">Models trained {e(info['trained_at'])}. All numbers in this report are computed directly from the
 saved models and data splits.</p>

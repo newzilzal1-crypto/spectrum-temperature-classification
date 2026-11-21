@@ -1,9 +1,10 @@
-"""Train every model once and save everything the Streamlit app needs into ./saved_models.
+"""Train every model once and save everything the Streamlit app needs into ./saved_models/<protocol>/.
 
-    python train_models.py                    # full run: 5-fold CV + final models (100 epochs for networks)
+    python train_models.py                    # both protocols, 5-fold CV + final models (100 epochs)
+    python train_models.py --protocol thesis  # only one protocol (thesis | spectrum | all)
     python train_models.py --epochs 5 --folds 3   # quick run
 
-Outputs
+Outputs (per protocol)
     preprocessor.joblib     clipping bounds + scaler + class labels (fitted on the training split)
     train_set.csv / test_set.csv   the exact stratified split used
     <model>.joblib / .keras final models trained on the full training split
@@ -29,7 +30,7 @@ import numpy as np
 import pandas as pd
 from sklearn.model_selection import StratifiedKFold
 
-from pipeline import (ARTIFACT_DIR, DL_MODELS, DROP_FEATURES, ML_MODELS, SEED, TARGET, TEST_SIZE,
+from pipeline import (CLASS_RULE, DL_MODELS, ML_MODELS, PROTOCOLS, SEED, TARGET, TEST_SIZE, artifact_dir,
                       build_dl_model, fit_preprocessor, load_and_split, slug, summary_metrics, transform)
 
 
@@ -48,9 +49,11 @@ def predict_proba(name, model, X):
     return model.predict(X[..., None], verbose=0) if name in DL_MODELS else model.predict_proba(X)
 
 
-def main(epochs: int, batch_size: int, folds: int):
+def main(protocol: str, epochs: int, batch_size: int, folds: int):
+    ARTIFACT_DIR = artifact_dir(protocol)
     os.makedirs(ARTIFACT_DIR, exist_ok=True)
-    df, train_df, test_df, features, le = load_and_split()
+    print(f"=== {PROTOCOLS[protocol]['name']} -> {ARTIFACT_DIR}")
+    df, train_df, test_df, features, le = load_and_split(protocol)
     labels = list(le.classes_)
     y_train = le.transform(train_df[TARGET].astype(str))
     names = list(ML_MODELS) + DL_MODELS
@@ -77,7 +80,8 @@ def main(epochs: int, batch_size: int, folds: int):
     test_df.to_csv(os.path.join(ARTIFACT_DIR, "test_set.csv"), index=False)
 
     info = {"models": {}, "n_rows": len(df), "n_train": len(train_df), "n_test": len(test_df),
-            "features": features, "dropped_features": DROP_FEATURES, "labels": labels,
+            "protocol": protocol, "features": features, "dropped_features": PROTOCOLS[protocol]["drop"],
+            "labels": labels, "class_rule": CLASS_RULE,
             "test_size": TEST_SIZE, "seed": SEED, "cv_folds": folds, "epochs": epochs,
             "batch_size": batch_size, "trained_at": time.strftime("%Y-%m-%d %H:%M"),
             "class_temperature": {c: [int(g.min()), int(g.max())]
@@ -109,6 +113,8 @@ if __name__ == "__main__":
     p.add_argument("--epochs", type=int, default=100)
     p.add_argument("--batch-size", type=int, default=64)
     p.add_argument("--folds", type=int, default=5)
+    p.add_argument("--protocol", choices=[*PROTOCOLS, "all"], default="all")
     a = p.parse_args()
-    np.random.seed(SEED)
-    main(a.epochs, a.batch_size, a.folds)
+    for key in (PROTOCOLS if a.protocol == "all" else [a.protocol]):
+        np.random.seed(SEED)
+        main(key, a.epochs, a.batch_size, a.folds)

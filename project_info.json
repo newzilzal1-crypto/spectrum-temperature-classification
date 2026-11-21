@@ -1,8 +1,9 @@
 {
-  "title": "Classification of Optical Spectrum Measurements into Temperature Classes Using Machine Learning and Deep Learning",
+  "title": "IoT and Artificial Intelligence to Design and Implement a Monitoring System for Distribution Transformers Based on an Optical Fiber Fabry–Perot Sensor with Micro-Cavity",
+  "subtitle": "AI module: classification of transformer-oil condition from optical spectrum measurements",
   "author": "Faraqid Qasim Mohammed",
-  "supervisor": "Prof. Mohammed Abid",
-  "institution": "[Department, College, University]",
-  "degree": "[M.Sc. / Ph.D. thesis]",
+  "supervisor": "Prof. Mohamed Abid  &  Dr. Yassine Aydi",
+  "institution": "National School of Electronics and Telecommunications of Sfax (ENET'Com), University of Sfax",
+  "degree": "Doctoral thesis (Ph.D. in Sciences and Technologies of Information and Communication)",
   "year": "2026"
 }

@@ -15,13 +15,30 @@ from sklearn.tree import DecisionTreeClassifier
 from xgboost import XGBClassifier
 
 DATA_PATH = os.path.join("Data", "Data.xlsx")
-ARTIFACT_DIR = "saved_models"
+ARTIFACT_ROOT = "saved_models"
 TARGET = "Class"
-# 'temperature' maps one-to-one onto Class (0-20 -> Class1, 40 -> Class2, 60 -> Class3, 80-100 -> Class4),
-# so it is excluded: otherwise every model scores ~100% without using the spectrum.
-DROP_FEATURES = ["temperature"]
 TEST_SIZE = 0.30
 SEED = 42
+
+# Oil-condition classes of the thesis (Section 3.6.4, "sieve" labelling by oil temperature).
+CLASS_NAMES = {"Class1": "Good", "Class2": "Not Bad", "Class3": "Poor", "Class4": "Very Poor"}
+CLASS_RULE = {"Good": "0 < T ≤ 25 °C", "Not Bad": "25 < T ≤ 50 °C", "Poor": "50 < T ≤ 75 °C",
+              "Very Poor": "75 < T ≤ 100 °C"}
+
+# Two experimental protocols, each trained and saved separately (saved_models/<key>/).
+#   thesis   - all 13 measured attributes, as in Chapter 4 of the thesis.
+#   spectrum - 'temperature' removed. The class is defined from temperature, so this checks that the
+#              optical spectrum on its own carries the information (robustness / leakage analysis).
+PROTOCOLS = {
+    "thesis": {"name": "Thesis protocol", "short": "All 13 attributes (incl. temperature)", "drop": []},
+    "spectrum": {"name": "Spectrum-only protocol", "short": "12 optical attributes (temperature excluded)",
+                 "drop": ["temperature"]},
+}
+
+
+def artifact_dir(protocol: str) -> str:
+    return os.path.join(ARTIFACT_ROOT, protocol)
+
 
 ML_MODELS = {
     "XGBoost": lambda: XGBClassifier(random_state=SEED, eval_metric="mlogloss"),
@@ -53,10 +70,12 @@ def transform(X: pd.DataFrame, prep: dict) -> np.ndarray:
     return prep["scaler"].transform(X)
 
 
-def load_and_split(path=DATA_PATH):
+def load_and_split(protocol="thesis", path=DATA_PATH):
     df = pd.read_excel(path)
-    features = [c for c in df.columns if c != TARGET and c not in DROP_FEATURES]
-    le = LabelEncoder().fit(df[TARGET].astype(str))
+    df[TARGET] = df[TARGET].astype(str).replace(CLASS_NAMES)
+    drop = PROTOCOLS[protocol]["drop"]
+    features = [c for c in df.columns if c != TARGET and c not in drop]
+    le = LabelEncoder().fit(df[TARGET])
     train_df, test_df = train_test_split(df, test_size=TEST_SIZE, stratify=df[TARGET], random_state=SEED)
     return df, train_df, test_df, features, le
 
